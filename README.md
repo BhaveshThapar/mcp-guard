@@ -96,5 +96,5 @@ is the last line of defense. Neither substitutes for the other.
 
 ---
 
-*Built by [YOUR NAME] · [contact / GitHub]. Grew out of the
+*Built by [Bhavesh Thapar]. Grew out of the
 [mcp-audit](https://github.com/BhaveshThapar/mcp-audit) 70-server study.*
