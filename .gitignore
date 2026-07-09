@@ -1,0 +1,5 @@
+__pycache__/
+*.pyc
+.mcp-guard/
+/tmp/mcpg_*
+.DS_Store
