@@ -61,20 +61,52 @@ rules are inconclusive, to keep inline latency low.
 
 ## Try it
 
+Two checks, one in each direction.
+
+**Catch a malicious server:**
+
 ```bash
 # runs a clean server (0 flags, baseline recorded), then the same server
 # "updated" to a compromised version (drift + poison flags fire)
 python3 demo/run_demo.py
 ```
 
-Against a real server:
+**Confirm it runs clean against a real third-party server:**
 
 ```bash
-python3 mcp_guard.py --id my-server -- npx -y <some-mcp-server>
+# defaults to @modelcontextprotocol/server-everything; pass any stdio MCP server after --
+python3 smoke.py
+python3 smoke.py -- npx -y @modelcontextprotocol/server-memory
 ```
 
-The proxy speaks MCP itself, so you can also point a real MCP client at
-`mcp_guard.py -- <server command>` in place of the server command.
+`smoke.py` exists because `mcp-guard` is a *proxy, not a driver*: on its own it
+launches a server and waits for a client to speak MCP to it, so running it bare
+against a server inspects nothing (no messages flow). `smoke.py` plays the
+client -- it performs the `initialize` -> `tools/list` handshake so a real
+`tools/list` flows through the proxy, and you watch it record a
+trust-on-first-use baseline and scan the server's tool schemas. Expected on a
+clean server: `baseline recorded (N tools)` and 0 flags.
+
+## Deploy it in front of a real server
+
+`mcp-guard` speaks MCP itself, so you put it in the path by wrapping wherever
+your MCP client launches the server. If your client config has:
+
+```json
+{ "command": "npx", "args": ["-y", "some-mcp-server"] }
+```
+
+wrap it:
+
+```json
+{
+  "command": "python3",
+  "args": ["/path/to/mcp_guard.py", "--id", "some-mcp-server", "--", "npx", "-y", "some-mcp-server"]
+}
+```
+
+Your agent's normal tool listing and calls now flow through `mcp-guard` and are
+inspected live. Baselines and the audit log default to `~/.mcp-guard/`.
 
 ## Roadmap
 
